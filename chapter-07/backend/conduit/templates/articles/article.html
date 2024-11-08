@@ -1,0 +1,139 @@
+{% extends "base.html" %} {% block content %}
+<div class="article-page" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <div class="banner">
+    <div class="container">
+      <h1>{{ article.title }}</h1>
+
+      <div class="article-meta">
+        {% if article.author.image %}
+        <a href="{{ article.author.get_absolute_url }}"
+          ><img src="{{ article.author.image }}"
+        />{{ article.author.get_full_name }}</a>
+        {% endif %}
+        <div class="info">
+          <a href="{{ article.author.get_absolute_url }}" class="author"
+            >{{ article.author.get_full_name }}</a
+          >
+          <span class="date">{{ article.created|date }}</span>
+        </div>
+        {% include "profiles/_follow_btn.html" %}
+         {% comment %} include "profiles/_follow_btn.html" with button_id="follow-top"
+        followed=article.author %} {% endcomment %}
+        
+        
+        &nbsp;&nbsp; {% include "articles/_favorite_btn.html"  %}
+      </div>
+    </div>
+  </div>
+
+  <div class="container page">
+    <div class="row article-content">
+      <div class="col-md-12">
+        <p>{{ article.summary }}</p>
+        {{ article.as_markdown|safe }}
+      </div>
+    </div>
+
+    <hr />
+
+                <div class="article-actions">
+                    <div class="article-meta">
+                        {% if article.author.image %}
+                            <a href="{{ article.author.get_absolute_url }}"><img src="{{ article.author.image }}"/></a>
+                        {% endif %}
+                        <div class="info">
+                            <a href="{{ article.author.get_absolute_url }}" class="author">{{ article.author.get_full_name }}</a>
+                            <span class="date">{{ article.created|date }}</span>
+                        </div>
+                        {% include "profiles/_follow_btn.html" with button_id='follow-bottom' followed=article.author %}
+                        &nbsp;
+                        {% include "articles/_favorite_btn.html" with button_id="favorite-bottom" %}
+                    </div>
+                </div>
+
+            <div class="row">
+
+                <div class="col-xs-12 col-md-8 offset-md-2" id="comments-container">
+
+                    {% if comment_form %}
+                      <div id="comment-form">
+                        {% include "comments/_comment_form.html" with form=comment_form  %}
+                      </div>
+                    {% endif %}
+
+                    {% for comment in comments %}
+                        <div id="comment-{{ comment.id }}">
+                            {% include "comments/_comment.html" %}
+                        </div>
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+    <script>
+      function connect() {
+          // Connect to the WebSocket
+          const articleId = {{ article.id }};
+          const wsPath = `ws://${window.location.host}/ws/articles/${articleId}`;
+          console.log('# WS Connecting to:', wsPath);
+
+          const socket = new WebSocket(wsPath);
+
+          socket.onopen = function(e) {
+              console.log('# WebSocket connection established');
+          };
+
+          socket.onclose = function(e) {
+              console.log('WebSocket connection closed');
+              setTimeout(function() {
+                  console.log("Reconnecting...");
+                  connect();
+              }, 2000);
+          };
+          socket.onerror = function(err) {
+              console.log("WebSocket encountered an error: " + err.message);
+              console.log("Closing the socket.");
+              socket.close();
+          }
+
+          socket.onmessage = function(e) {
+              const data = JSON.parse(e.data);
+              
+              // Append new comment to DOM or handle as needed
+              console.log('# WS onmessage with:', data);
+
+
+              if (data.comment !== null) {
+                if (data.comment.author_id !=={{ request.user.id }}){
+                  appendComment( data.comment.html );
+                } else {
+                  console.log('Comment by current user. Ignoring.');
+                }
+              } else{
+                  console.log('No comment found in message:', data);
+              }
+          };
+
+          function appendComment(commentHTML) {
+            
+              // Create a temporary element
+              const tempDiv = document.createElement('div');
+              
+              // Set the innerHTML to the escaped HTML string
+              tempDiv.innerHTML = JSON.parse(commentHTML);
+
+              // Extract the parsed HTML content
+              const unescapedHTML = tempDiv.firstChild;
+
+              console.log('Appending comment:', unescapedHTML);
+              const container = document.getElementById('comments-container');
+              container.insertBefore(tempDiv.firstChild, container.firstChild);
+          }
+      }
+      connect();
+    </script>
+            
+  </div>
+</div>
+{% endblock content %}

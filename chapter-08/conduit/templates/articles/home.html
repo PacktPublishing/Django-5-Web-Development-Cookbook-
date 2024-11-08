@@ -1,0 +1,71 @@
+{% extends "base.html" %} {% block content %}
+<div class="home-page" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <div class="banner">
+    <div class="container">
+      <h1 class="logo-font">conduit</h1>
+      <p>A place to share your knowledge.</p>
+    </div>
+  </div>
+
+  <div class="container page">
+    <div class="row">
+      <div class="col-md-9" id="articles-container">
+        {% if user.is_authenticated %}
+        <div class="feed-toggle">
+          <ul class="nav nav-pills outline-active">
+            <li class="nav-item">
+              <a
+                class="nav-link{% if own_feed %} active{% endif %}"
+                href="{{ request.path }}?own"
+                >Your Feed</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link{% if not own_feed %} active{% endif %}"
+                href="{{ request.path }}"
+                >Global Feed</a
+              >
+            </li>
+          </ul>
+        </div>
+        {% endif %} {% include "articles/_article_list.html" %}
+      </div>
+
+      <script>
+        document.addEventListener("htmx:afterSwap", function (event) {
+          if (event.detail.target.id === "articles-container") {
+            // Remove the old load-more button if it exists
+            var oldLoadMore = document.querySelector("#load-more");
+            if (oldLoadMore) {
+              oldLoadMore.parentNode.removeChild(oldLoadMore);
+            }
+            // Optional: Scroll restoration to enhance UX
+            if ("scrollRestoration" in history) {
+              history.scrollRestoration = "manual";
+            }
+          } else {
+            console.log(event.detail.target.id);
+          }
+        });
+      </script>
+
+      <div class="col-md-3">
+        <div class="sidebar">
+          <p>Popular Tags</p>
+
+          <div class="tag-list">
+            {% for tag in tags %}
+            <a
+              href="{% url 'article-list' %}?tag={{ tag.name }}"
+              class="tag-pill tag-default"
+              >{{ tag }}</a
+            >
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

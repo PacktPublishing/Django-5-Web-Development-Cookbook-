@@ -1,0 +1,25 @@
+<!-- Navigation bar -->
+<nav class="navbar navbar-light">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'article-list'%}">conduit</a>
+
+    {% with active_page=request.resolver_match.active_page %}
+    <ul class="nav navbar-nav pull-xs-right">
+      <li class="nav-item">
+        <a
+          class="nav-link{% if active_page == 'profile' %} active{% endif %}"
+          href="{% url 'profile' %}"
+          >Profile</a
+        >
+      </li>
+      <li class="nav-item{% if active_page == 'profile' %} active{% endif %}">
+        <a class="nav-link" href="{% url 'create-article-view' %}">
+          <i class="ion-compose"></i>
+          New Article
+        </a>
+      </li>
+
+      {% include 'user_nav.html' %} {% endwith %}
+    </ul>
+  </div>
+</nav>

@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+  app:
+    build:
+      context: .
+      args:
+        INSTALL_DEV: true
+    volumes:
+      - conduit:/usr/src/app/
+    ports:
+      - 8000:8000
+    env_file: .env
+    stdin_open: true
+    tty: true
+
+  db:
+    image: postgres:15
+    ports:
+      - 5432:5432
+    volumes:
+      - ./.postgres:/var/lib/postgresql/data
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
+      - POSTGRES_DB=${POSTGRES_DB?Variable not set}
+
+volumes:
+  .postgres:
+  conduit:
+  

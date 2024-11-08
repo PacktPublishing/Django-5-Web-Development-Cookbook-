@@ -1,0 +1,123 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.development
+
+      args:
+        INSTALL_DEV: true
+    volumes:
+      - ./conduit/:/code
+    ports:
+      - 8000:8000
+    env_file: .env
+    environment:
+        # Exposes BLACKFIRE_SERVER_* environment variables from the host
+        BLACKFIRE_SERVER_ID: 61b8c44e-1e6e-4a2b-881a-159a9aaa4fd2
+        BLACKFIRE_SERVER_TOKEN: 236626e94efe0d9ec140e586b9db3adbf63ab31d64020693c67836fe4481d980
+
+        # Exposes BLACKFIRE_CLIENT_* environment variables
+        # allowing the client to communicate with Blackfire's API:
+        BLACKFIRE_CLIENT_ID: d5c9d5a4-2677-4c90-b4a8-cbc9dc84ec50
+        BLACKFIRE_CLIENT_TOKEN: 1128cba034a80d6ef0daeb7cbd6f4ebc85694a945dd4b9e34eb103134cf60344
+    stdin_open: true
+    tty: true
+    depends_on:
+      - db
+      - blackfire
+
+  db:
+    image: postgres:15
+    ports:
+      - ${POSTGRES_DEFAULT_PORT}:5432
+    volumes:
+      - ./.postgres:/var/lib/postgresql/data
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
+      - POSTGRES_DB=${POSTGRES_DB?Variable not set}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER?Variable not set}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:6
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  selenium:
+    image: selenium/standalone-firefox
+    ports:
+      - 4444:4444
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "4444"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  master:
+    image: locustio/locust
+    ports:
+     - "8089:8089"
+    volumes:
+      - ./conduit:/mnt/locust
+    command: -f /mnt/locust/locustfile.py --master -H http://master:8089
+  
+  worker:
+    image: locustio/locust
+    volumes:
+      - ./conduit:/mnt/locust
+    command: -f /mnt/locust/locustfile.py --worker --master-host master
+
+  
+  blackfire:
+    image: blackfire/blackfire:2
+    ports: ["8307"]
+    environment:
+        # Define Blackfire Agent log vebosity level
+        BLACKFIRE_LOG_LEVEL: 4
+
+        # Exposes BLACKFIRE_SERVER_* environment variables from the host
+        BLACKFIRE_SERVER_ID: 61b8c44e-1e6e-4a2b-881a-159a9aaa4fd2
+        BLACKFIRE_SERVER_TOKEN: 236626e94efe0d9ec140e586b9db3adbf63ab31d64020693c67836fe4481d980
+
+        # Exposes BLACKFIRE_CLIENT_* environment variables
+        # allowing the client to communicate with Blackfire's API:
+        BLACKFIRE_CLIENT_ID: d5c9d5a4-2677-4c90-b4a8-cbc9dc84ec50
+        BLACKFIRE_CLIENT_TOKEN: 1128cba034a80d6ef0daeb7cbd6f4ebc85694a945dd4b9e34eb103134cf60344
+
+  # db1:
+  #   image: postgres:15
+  #   ports:
+  #     - ${POSTGRES_SHARD1_PORT}:5432
+  #   volumes:
+  #     - ./.postgres:/var/lib/postgresql/data
+  #   environment:
+  #     - PGDATA=/var/lib/postgresql/data/pgdata
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+  #     - POSTGRES_USER=${POSTGRES_USER?Variable not set}
+  #     - POSTGRES_DB=${POSTGRES_DB?Variable not set}
+
+  # db2:
+  #   image: postgres:15
+  #   ports:
+  #     - ${POSTGRES_SHARD2_PORT}:5432
+  #   volumes:
+  #     - ./.postgres:/var/lib/postgresql/data
+  #   environment:
+  #     - PGDATA=/var/lib/postgresql/data/pgdata
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+  #     - POSTGRES_USER=${POSTGRES_USER?Variable not set}
+  #     - POSTGRES_DB=${POSTGRES_DB?Variable not set}
+
+volumes:
+  .postgres:
+  conduit:

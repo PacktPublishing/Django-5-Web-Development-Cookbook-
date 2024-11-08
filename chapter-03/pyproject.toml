@@ -1,0 +1,64 @@
+[tool.poetry]
+name = "conduit-api"
+version = "0.1.0"
+description = "Realword is a medium clone. This implementation uses django rest framework to create a backend service for the blog."
+authors = ["Bogdan Veliscu <bogdan.veliscu@outlook.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+Django = "^5.0"
+djangorestframework = "^3.15.1"
+markdown = "^3.6"
+django-filter = "^24.2"
+djangorestframework-simplejwt = "^5.3.1"
+psycopg2-binary = "^2.9.9"
+uvicorn = "^0.29.0"
+gunicorn = "^22.0.0"
+whitenoise = "^6.6.0"
+django-taggit = "^5.0.1"
+django-dotenv = "^1.4.2"
+django-otp = "^1.5.0"
+django-two-factor-auth = "^1.16.0"
+phonenumbers = "^8.13.37"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.0"
+black = "^24.4.2"
+isort = "^5.13.2"
+flake8 = "^7.0.0"
+ruff = "^0.4.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "W191",  # indentation contains tabs
+    "B904",  # Allow raising exceptions without from e, for HTTPException
+]
+
+[tool.ruff.lint.pyupgrade]
+# Preserve types, even if a file imports `from __future__ import annotations`.
+keep-runtime-typing = true
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+line_length = 88

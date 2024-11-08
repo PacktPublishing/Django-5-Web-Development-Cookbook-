@@ -1,0 +1,70 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.development
+
+      args:
+        INSTALL_DEV: false
+    volumes:
+      - ./conduit/:/code
+    expose:
+      - "8000"
+    ports:
+      - 8000:8000
+    env_file: .env
+    stdin_open: false
+    tty: true
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: postgres:15
+    ports:
+      - ${POSTGRES_DEFAULT_PORT}:5432
+    volumes:
+      - ./.postgres:/var/lib/postgresql/data
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
+      - POSTGRES_DB=${POSTGRES_DB?Variable not set}
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./conduit/static/:/var/www/static/
+      - ./conduit/media/:/var/www/media/
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    depends_on:
+      - app
+    networks:
+      - app-network
+
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - /var/certbot/conf:/etc/letsencrypt/:rw
+      - /var/certbot/www/:/var/www/certbot/:rw
+    networks:
+      - app-network
+    depends_on:
+      - nginx
+
+volumes:
+  .postgres:
+  conduit:
+  static:
+  media:
+
+networks:
+  app-network:
+    driver: bridge

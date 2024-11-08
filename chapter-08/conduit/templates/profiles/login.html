@@ -1,0 +1,51 @@
+{% extends "base.html" %} {% block content %}
+<div class="auth-page">
+  <div class="container page">
+    <div class="row">
+      <div class="col-md-6 offset-md-3 col-xs-12">
+        <h1 class="text-xs-center">Sign up</h1>
+        <p class="text-xs-center">
+          <a href="{% url 'register' %}">Have an account?</a>
+        </p>
+
+        {% if form.errors %}
+        <ul class="error-messages">
+          {% for error in form.errors.values %} {{ error.as_text }} {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form method="post" action="{% url 'account-login' %}">
+          {% csrf_token %}
+          <fieldset class="form-group">
+            <input
+              type="email"
+              name="username"
+              placeholder="Email"
+              class="form-control form-control-lg"
+              id="id_username"
+              value="{{ form.email.value }}"
+            />
+          </fieldset>
+          <fieldset class="form-group">
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              class="form-control form-control-lg"
+              value="{{ form.password.value }}"
+              id="id_password"
+            />
+          </fieldset>
+          {% comment %} {{ form.as_p }} {% endcomment %}
+
+          <button class="btn btn-lg btn-primary pull-xs-right">Sign in</button>
+        </form>
+
+        <p class="text-xs-center">
+          <a href="{% url 'password_reset' %}">Forgot Password?</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

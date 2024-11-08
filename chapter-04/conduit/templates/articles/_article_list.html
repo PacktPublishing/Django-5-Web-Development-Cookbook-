@@ -1,0 +1,24 @@
+{% if articles %} 
+{% for article in articles %} 
+    {% include 'articles/_article.html' %}
+{% endfor %} 
+{% else %}
+<p>No articles are here... yet.</p>
+{% endif %}
+
+{% if next_page_number %}
+
+<span class="col-md-9">
+<div
+    id="load-more"
+    class="load-more"
+    hx-get="{% url 'article-list' %}?page={{ next_page_number }}"
+    hx-trigger="revealed"
+    hx-headers='{"X-Requested-With": "XMLHttpRequest" }'
+    hx-swap="beforeend"
+    hx-target="#articles-container"
+>
+    <button>Loading more...</button>
+</div>
+</span>
+{% endif %}

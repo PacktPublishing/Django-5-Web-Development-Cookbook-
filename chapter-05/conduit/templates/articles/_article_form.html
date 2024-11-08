@@ -1,0 +1,92 @@
+{% comment %} {% load widget_tweaks %} {% endcomment %}
+<form hx-target="this" hx-post="{{ request.path }}" hx-swap="innerHTML" enctype="multipart/form-data">
+  {% if form.errors %}
+  <ul class="error-messages">
+    {% for error in form.errors.values %} {{ error.as_text }} {% endfor %}
+  </ul>
+  {% endif %} {% csrf_token %}
+  <fieldset class="form-group">
+    <label for="id_title">Article Title</label>
+    <input
+      type="text"
+      name="title"
+      id="id_title"
+      class="form-control form-control-lg"
+      placeholder="Article Title"
+      required
+    >{{ form.title.value|default_if_none:"" }}
+  
+  </input>
+  </fieldset>
+  <fieldset class="form-group">
+    <label for="id_summary">Summary</label>
+    <textarea
+      name="summary"
+      id="id_summary"
+      class="form-control"
+      placeholder="What's this article about?"
+      required
+    >
+{{ form.summary.value|default_if_none:"" }}</textarea
+    >
+  </fieldset>
+  <fieldset class="form-group">
+    <label for="id_content">Content</label>
+    <textarea
+      name="content"
+      id="id_content"
+      class="form-control"
+      placeholder="Write your article (in markdown)"
+      rows="8"
+      required
+    >
+{{ form.content.value|default_if_none:"" }}</textarea
+    >
+  <fieldset class="form-group">
+    <label for="id_image">Article Image</label>
+    <input
+      type="file"
+      name="image"
+      id="id_image"
+      class="form-control"
+    >
+  </fieldset>
+  </fieldset>
+  <fieldset
+    class="form-group"
+    x-data="{# fmt:off #}{
+              insertTag(tag) {
+                  let tags = $refs.input.value.split(' ').slice(0, -1);
+                  tags.push(tag);
+                  $refs.input.value = tags.join(' ');
+                  $refs.input.focus();
+                  $refs.list.innerHTML = '';
+                  }
+              }"
+    {#
+    fmt:on
+    #}
+  >
+    <label for="id_tags">Tags</label>
+    <input
+      type="text"
+      name="tags"
+      id="id_tags"
+      class="form-control"
+      placeholder="Enter tags"
+      x-ref="input"
+      hx-trigger="keyup changed delay:200ms"
+      hx-target="#tags-list"
+      hx-swap="innerHTML"
+      hx-get="{{ tags_autocomplete_url }}"
+      autocomplete="off"
+      value="{{ form.tags.value }}"
+    />
+    <div class="tag-list" id="tags-list" x-ref="list"></div>
+  </fieldset>
+  <fieldset>
+    <button class="btn btn-lg pull-xs-right btn-primary" type="submit">
+      {{ article|yesno:"Save,Publish" }} Article
+    </button>
+  </fieldset>
+</form>

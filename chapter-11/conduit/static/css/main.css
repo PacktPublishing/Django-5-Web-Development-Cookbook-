@@ -1,0 +1,62 @@
+/* Reset default styles */
+body,
+h1,
+p {
+    margin: 0;
+    padding: 0;
+}
+
+/* Set default font and color */
+body {
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+/* Add some spacing */
+h1,
+h2,
+h3,
+p {
+    margin-bottom: 10px;
+}
+
+/* Style the header */
+header {
+    background-color: #f2f2f2;
+    padding: 20px;
+}
+
+/* Style the navigation menu */
+nav {
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin-right: 10px;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Style the main content area */
+main {
+    padding: 20px;
+}
+
+/* Style the footer */
+footer {
+    background-color: #f2f2f2;
+    padding: 20px;
+    text-align: center;
+}

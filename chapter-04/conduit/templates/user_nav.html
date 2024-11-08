@@ -1,0 +1,28 @@
+{% if user.is_authenticated %}
+<li class="nav-item{% if url_name == 'settings' %} active{% endif %}">
+  <a class="nav-link" href="{% url 'two_factor:profile' %}">
+    <i class="ion-gear-a"></i>
+    Settings
+  </a>
+</li>
+
+<li class="nav-item">
+  <a
+    class="nav-link"
+    href="javascript:void(0)"
+    hx-post="{% url 'logout'%}"
+    hx-target="body"
+    hx-push-url="true"
+    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+  >
+    Sign Out
+  </a>
+</li>
+{% else %}
+<li class="nav-item{% if url_name == 'two_factor:login' %} active{% endif %}">
+  <a class="nav-link" href="{% url 'two_factor:login' %}">Sign in</a>
+</li>
+<li class="nav-item{% if url_name == 'register' %} active{% endif %}">
+  <a class="nav-link" href="{% url 'register' %}">Sign up</a>
+</li>
+{% endif %}
